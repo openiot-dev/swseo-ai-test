@@ -40,8 +40,8 @@ variable "log_retention_days" {
   default     = 14
 }
 
-variable "anthropic_api_key" {
+variable "openai_api_key" {
   type        = string
-  description = "Anthropic API key for the chat Lambda."
+  description = "OpenAI API key for the chat Lambda."
   sensitive   = true
 }

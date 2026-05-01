@@ -15,7 +15,7 @@ import {
   Square,
   Volume2,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,8 +117,14 @@ export function VoiceChat() {
   const scrollEndRef = useRef<HTMLDivElement | null>(null);
   const actionTimerRef = useRef<number | null>(null);
 
-  const sttSupported = useMemo(() => getSpeechRecognition() !== null, []);
-  const ttsSupported = useMemo(() => speechSynthesisSupported(), []);
+  const [mounted, setMounted] = useState(false);
+  const [sttSupported, setSttSupported] = useState(false);
+  const [ttsSupported, setTtsSupported] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    setSttSupported(getSpeechRecognition() !== null);
+    setTtsSupported(speechSynthesisSupported());
+  }, []);
 
   const comm: DogComm = isRecording
     ? "listening"
@@ -308,11 +314,15 @@ export function VoiceChat() {
               </CardDescription>
             </div>
             <div className="flex flex-wrap justify-end gap-1.5">
-              <Badge variant={sttSupported ? "secondary" : "destructive"}>
-                STT {sttSupported ? "OK" : "미지원"}
+              <Badge
+                variant={!mounted || sttSupported ? "secondary" : "destructive"}
+              >
+                STT {!mounted ? "확인 중" : sttSupported ? "OK" : "미지원"}
               </Badge>
-              <Badge variant={ttsSupported ? "secondary" : "destructive"}>
-                TTS {ttsSupported ? "OK" : "미지원"}
+              <Badge
+                variant={!mounted || ttsSupported ? "secondary" : "destructive"}
+              >
+                TTS {!mounted ? "확인 중" : ttsSupported ? "OK" : "미지원"}
               </Badge>
               {lastCommand && (
                 <Badge className="gap-1">

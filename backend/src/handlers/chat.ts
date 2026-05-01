@@ -1,16 +1,16 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 
-const client = new Anthropic();
+const client = new OpenAI();
 
-const DEFAULT_MODEL = "claude-sonnet-4-6";
+const DEFAULT_MODEL = "gpt-4o-mini";
 const DEFAULT_MAX_TOKENS = 16000;
 
 interface ChatRequestBody {
-  messages: Anthropic.MessageParam[];
+  messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
   system?: string;
   model?: string;
   max_tokens?: number;
@@ -34,25 +34,22 @@ export const handler = async (
     return jsonResponse(400, { error: "'messages' must be a non-empty array" });
   }
 
+  const messages = body.system
+    ? [{ role: "system" as const, content: body.system }, ...body.messages]
+    : body.messages;
+
   try {
-    const response = await client.messages.create({
+    const response = await client.chat.completions.create({
       model: body.model ?? DEFAULT_MODEL,
       max_tokens: body.max_tokens ?? DEFAULT_MAX_TOKENS,
-      system: body.system
-        ? [
-            {
-              type: "text",
-              text: body.system,
-              cache_control: { type: "ephemeral" },
-            },
-          ]
-        : undefined,
-      messages: body.messages,
+      messages,
     });
 
-    return jsonResponse(200, response);
+    const reply = response.choices[0]?.message?.content?.trim() ?? "";
+
+    return jsonResponse(200, { reply, raw: response });
   } catch (error) {
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof OpenAI.APIError) {
       return jsonResponse(error.status ?? 500, {
         error: error.message,
         type: error.name,

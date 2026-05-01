@@ -11,7 +11,7 @@ locals {
       handler     = "chat.handler"
       route_key   = "POST /chat"
       env         = {
-        ANTHROPIC_API_KEY = var.anthropic_api_key
+        OPENAI_API_KEY = var.openai_api_key
       }
     }
   }

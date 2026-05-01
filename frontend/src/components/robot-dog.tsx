@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import { cn } from "@/lib/utils";
 
 export type DogPose = "stand" | "sit" | "lay";
@@ -12,6 +14,11 @@ export type DogAction =
   | "shake"
   | "jump";
 export type DogComm = "idle" | "listening" | "thinking" | "speaking";
+
+const RobotDog3D = dynamic(
+  () => import("./robot-dog-3d").then((m) => m.RobotDog3D),
+  { ssr: false, loading: () => <div className="dog-stage-loading">3D 모델 불러오는 중…</div> },
+);
 
 const POSE_LABEL: Record<DogPose, string> = {
   stand: "기립",
@@ -63,7 +70,6 @@ export function RobotDog({
 
   return (
     <div className={cn("dog-stage", className)}>
-      <div className="dog-floor" aria-hidden />
       <div className="dog-grid" aria-hidden />
 
       <div className="dog-status">
@@ -72,58 +78,11 @@ export function RobotDog({
         <span className="dog-status-model">Unitree Go2 EDU</span>
       </div>
 
-      <div
-        className="dog"
-        data-pose={pose}
-        data-action={action}
-        data-comm={comm}
-        aria-label={`Robot dog: ${label}`}
-      >
-        {/* far-side legs (depth) */}
-        <div className="dog-leg dog-leg-bf">
-          <div className="dog-shin">
-            <div className="dog-foot" />
-          </div>
-        </div>
-        <div className="dog-leg dog-leg-ff">
-          <div className="dog-shin">
-            <div className="dog-foot" />
-          </div>
-        </div>
-
-        {/* body */}
-        <div className="dog-body">
-          <div className="dog-body-pack" />
-          <div className="dog-body-vent" />
-          <div className="dog-body-id">02</div>
-        </div>
-
-        {/* head */}
-        <div className="dog-head">
-          <div className="dog-cam">
-            <div className="dog-eye" />
-          </div>
-          <div className="dog-antenna">
-            <span />
-          </div>
-          <div className="dog-mouth" />
-          <div className="dog-head-line" />
-        </div>
-
-        {/* near-side legs (front) */}
-        <div className="dog-leg dog-leg-bn">
-          <div className="dog-shin">
-            <div className="dog-foot" />
-          </div>
-        </div>
-        <div className="dog-leg dog-leg-fn">
-          <div className="dog-shin">
-            <div className="dog-foot" />
-          </div>
-        </div>
-
-        <div className="dog-shadow" aria-hidden />
+      <div className="dog-stage-canvas">
+        <RobotDog3D pose={pose} action={action} comm={comm} />
       </div>
+
+      <div className="dog-stage-hint">드래그하여 회전 · 휠로 줌</div>
     </div>
   );
 }
