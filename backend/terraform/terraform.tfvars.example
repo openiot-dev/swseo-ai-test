@@ -1,0 +1,4 @@
+project_name      = "swseo-ai-test"
+environment       = "dev"
+aws_region        = "ap-northeast-2"
+anthropic_api_key = "sk-ant-..."
